@@ -32,7 +32,7 @@ public class FormattedRect : MonoBehaviour
 
     public TextAnchor anchor;
 
-    float safeDpi = 200f;
+    float safeDpi = 220f;
 
     public Rect GetRect()
     {
@@ -46,6 +46,78 @@ public class FormattedRect : MonoBehaviour
         }
     }
 
+    public Rect CenteredRect(float x, float y, float width, float height)
+    {
+        return new Rect(x - width / 2, y - height / 2, width, height);
+    }
+
+    public Rect AnchorRect(float _x, float _y, float _width, float _height, TextAnchor _anchor)
+    {
+        if (_anchor == TextAnchor.UpperCenter)
+        {
+            return new Rect((Screen.width - _width) * 0.5f + _x,
+                _y,
+                _width,
+                _height);
+        }
+        else if (_anchor == TextAnchor.UpperRight)
+        {
+            return new Rect(Screen.width - _width - _x,
+                _y,
+                _width,
+                _height);
+        }
+        else if (_anchor == TextAnchor.MiddleLeft)
+        {
+            return new Rect(_x,
+                (Screen.height - _height) * 0.5f + _y,
+                _width,
+                _height);
+        }
+        else if (_anchor == TextAnchor.MiddleCenter)
+        {
+            return new Rect((Screen.width - _width) * 0.5f + _x,
+                (Screen.height - _height) * 0.5f + _y,
+                _width,
+                _height);
+        }
+        else if (_anchor == TextAnchor.MiddleRight)
+        {
+            return new Rect(Screen.width - _width - _x,
+                (Screen.height - _height) * 0.5f + _y,
+                _width,
+                _height);
+        }
+        else if (_anchor == TextAnchor.LowerLeft)
+        {
+            return new Rect(_x,
+                Screen.height - _height - _y,
+                _width,
+                _height);
+        }
+        else if (_anchor == TextAnchor.LowerCenter)
+        {
+            return new Rect((Screen.width - _width) * 0.5f + _x,
+                Screen.height - _height + _y,
+                _width,
+                _height);
+        }
+        else if (_anchor == TextAnchor.LowerRight)
+        {
+            return new Rect(Screen.width - _width - _x,
+                Screen.height - _height - _y,
+                _width,
+                _height);
+        }
+        else
+        {
+            return new Rect(_x,
+                _y,
+                _width,
+                _height);
+        }
+    }
+
     public Rect GetStandardRect()
     {
         float aWidth = GetTruePixel(width, widthFormat, Screen.width);
@@ -53,69 +125,7 @@ public class FormattedRect : MonoBehaviour
         float aX = GetTruePixel(x, xFormat, Screen.width);
         float aY = GetTruePixel(y, yFormat, Screen.height);
 
-        if (anchor == TextAnchor.UpperCenter)
-        {
-            return new Rect((Screen.width - aWidth) * 0.5f + aX,
-                aY,
-                aWidth,
-                aHeight);
-        }
-        else if (anchor == TextAnchor.UpperRight)
-        {
-            return new Rect(Screen.width - aWidth - aX,
-                aY,
-                aWidth,
-                aHeight);
-        }
-        else if (anchor == TextAnchor.MiddleLeft)
-        {
-            return new Rect(aX,
-                (Screen.height - aHeight) * 0.5f + aY,
-                aWidth,
-                aHeight);
-        }
-        else if (anchor == TextAnchor.MiddleCenter)
-        {
-            return new Rect((Screen.width - aWidth) * 0.5f + aX,
-                (Screen.height - aHeight) * 0.5f + aY,
-                aWidth,
-                aHeight);
-        }
-        else if (anchor == TextAnchor.MiddleRight)
-        {
-            return new Rect(Screen.width - aWidth - aX,
-                (Screen.height - aHeight) * 0.5f + aY,
-                aWidth,
-                aHeight);
-        }
-        else if (anchor == TextAnchor.LowerLeft)
-        {
-            return new Rect(aX,
-                Screen.height - aHeight + aY,
-                aWidth,
-                aHeight);
-        }
-        else if (anchor == TextAnchor.LowerCenter)
-        {
-            return new Rect((Screen.width - aWidth) * 0.5f + aX,
-                Screen.height - aHeight + aY,
-                aWidth,
-                aHeight);
-        }
-        else if (anchor == TextAnchor.LowerRight)
-        {
-            return new Rect(Screen.width - aWidth - aX,
-                Screen.height - aHeight + aY,
-                aWidth,
-                aHeight);
-        }
-        else
-        {
-            return new Rect(aX,
-                aY,
-                aWidth,
-                aHeight);
-        }
+        return AnchorRect(aX, aY, aWidth, aHeight, anchor);
     }
 
     public Rect GetMinMaxRect()
@@ -138,6 +148,16 @@ public class FormattedRect : MonoBehaviour
             return value;
     }
 
+    public float GetTruePixel(float value, eFormat format)
+    {
+        if (format == eFormat.percent)
+            return PercentToPixel(value, Screen.width);
+        else if (format == eFormat.inch)
+            return InchToPixel(value);
+        else
+            return value;
+    }
+
     public float PercentToPixel(float percent, float baseValue)
     {
         return baseValue * percent / 100;
@@ -149,5 +169,33 @@ public class FormattedRect : MonoBehaviour
             return inch * safeDpi;
         else
             return inch * Screen.dpi;
+    }
+
+    public Rect LimitEdge(Rect r)
+    {
+        float gap;
+
+        if (r.xMin < 0)
+        {
+            gap = Mathf.Abs(r.xMin);
+            r.x += gap;
+        }
+        else if (r.xMax > Screen.width)
+        {
+            gap = r.xMax - Screen.width;
+            r.x -= gap;
+        }
+        else if (r.yMin < 0)
+        {
+            gap = Mathf.Abs(r.yMin);
+            r.y += gap;
+        }
+        else if (r.yMax > Screen.height)
+        {
+            gap = r.yMax - Screen.height;
+            r.y -= gap;
+        }
+
+        return r;
     }
 }
